@@ -1,0 +1,73 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class GameManager : MonoBehaviour {
+
+	private GameObject[] chasers;
+	private int numChasers; // number of chasers
+
+	private Vector2 screenSize;
+	public GUIText titleText; // title text object
+	public GUIText scoreText; // score text object
+	public GUIText completedText; // level completed text object
+
+	// Use this for initialization
+	void Start() {
+		// find total number of chasers
+		chasers = GameObject.FindGameObjectsWithTag("Chaser");
+		numChasers = chasers.Length;
+
+		Debug.Log (numChasers + " robots are still active.");
+		if (scoreText)
+			scoreText.text = "Remaining: " + numChasers;
+
+		if (completedText)
+		completedText.enabled = false; // hide the level completed text object
+
+		screenSize = new Vector2(Screen.width, Screen.height);
+		UpdateGUIPositions();
+	}
+
+	// OnTriggerEnter is called when a collider enters this trigger
+	void OnTriggerEnter(Collider col) {
+
+		Chaser ch = col.gameObject.GetComponent<Chaser>();
+
+		if ((ch) && (ch.chase)) {
+			ch.chase = false;
+
+			numChasers--;
+			if (scoreText)
+				scoreText.text = "Remaining: " + numChasers;
+
+			if (numChasers > 0) {
+				Debug.Log (numChasers + " robots are still active.");
+			}
+			else {
+				if (completedText) {
+					completedText.text = "LEVEL COMPLETED\n IN " + Time.realtimeSinceStartup.ToString("F1") + " SECONDS!";
+					completedText.pixelOffset = new Vector2(0, 180); // ensure text is centred on screen
+					completedText.enabled = true;
+				}
+				Debug.Log ("Area cleared in " + Time.realtimeSinceStartup + " seconds.");
+			}
+		}
+	}
+
+	// Update is called once per frame
+	void Update() {
+		if (Screen.width != screenSize.x) {
+			screenSize = new Vector2(Screen.width, Screen.height);
+			UpdateGUIPositions();
+		}
+	}
+
+	// Custom function to adjust GUI position
+	void UpdateGUIPositions() {
+		if (titleText)
+			titleText.pixelOffset = new Vector2(-(screenSize.x/2 - 20), (screenSize.y/2 - 20));
+		if (scoreText)
+			scoreText.pixelOffset = new Vector2((screenSize.x/2 - 20), (screenSize.y/2 - 20));
+
+	}
+}
